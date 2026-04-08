@@ -689,7 +689,6 @@ void Probabilities::set_default_unary_ops_prob() {
 
   SET_SINGLE_NAME("unary_minus_prob", Minus, 1);
   SET_SINGLE_NAME("unary_not_prob", Not, 1);
-  SET_SINGLE_NAME("unary_bit_not_prob", BitNot, 1);
 
   set_group_prob(true, ProbName::pUnaryOpsProb, m);
   set_prob_filter(ProbName::pUnaryOpsProb);
@@ -729,11 +728,6 @@ void Probabilities::set_default_binary_ops_prob() {
   SET_SINGLE_NAME("binary_ne_prob", CmpNe, 1);
   SET_SINGLE_NAME("binary_and_prob", And, 1);
   SET_SINGLE_NAME("binary_or_prob", Or, 1);
-  SET_SINGLE_NAME("binary_bit_xor_prob", BitXor, 1);
-  SET_SINGLE_NAME("binary_bit_and_prob", BitAnd, 1);
-  SET_SINGLE_NAME("binary_bit_or_prob", BitOr, 1);
-  SET_SINGLE_NAME("binary_bit_rshift_prob", RShift, 1);
-  SET_SINGLE_NAME("binary_bit_lshift_prob", LShift, 1);
 
   set_group_prob(true, ProbName::pBinaryOpsProb, m);
   set_prob_filter(ProbName::pBinaryOpsProb);
@@ -751,23 +745,12 @@ void Probabilities::set_default_statement_prob() {
   // never generate stand-alone blocks
   SET_SINGLE_NAME("statement_block_prob", Block, 0);
   SET_SINGLE_NAME("statement_ifelse_prob", IfElse, 15);
-  SET_SINGLE_NAME("statement_for_prob", For, 30);
+  SET_SINGLE_NAME("statement_for_prob", For, 0);
   SET_SINGLE_NAME("statement_return_prob", Return, 35);
   SET_SINGLE_NAME("statement_continue_prob", Continue, 40);
   SET_SINGLE_NAME("statement_break_prob", Break, 45);
-  if (CGOptions::jumps() && CGOptions::arrays()) {
-    SET_SINGLE_NAME("statement_goto_prob", Goto, 50);
-    SET_SINGLE_NAME("statement_arrayop_prob", ArrayOp, 60);
-  } else if (CGOptions::jumps() && !CGOptions::arrays()) {
-    SET_SINGLE_NAME("statement_arrayop_prob", ArrayOp, 0);
-    SET_SINGLE_NAME("statement_goto_prob", Goto, 50);
-  } else if (!CGOptions::jumps() && CGOptions::arrays()) {
-    SET_SINGLE_NAME("statement_goto_prob", Goto, 0);
-    SET_SINGLE_NAME("statement_arrayop_prob", ArrayOp, 55);
-  } else {
-    SET_SINGLE_NAME("statement_goto_prob", Goto, 0);
-    SET_SINGLE_NAME("statement_arrayop_prob", ArrayOp, 0);
-  }
+  SET_SINGLE_NAME("statement_goto_prob", Goto, 0);
+  SET_SINGLE_NAME("statement_arrayop_prob", ArrayOp, 0);
   // use the remaining probabilities for assignments
   SET_SINGLE_NAME("statement_assign_prob", Assign, 100);
 

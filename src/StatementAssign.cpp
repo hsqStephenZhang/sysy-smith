@@ -67,40 +67,22 @@ DistributionTable StatementAssign::assignOpsTable_;
 
 void StatementAssign::InitProbabilityTable() {
   assignOpsTable_.add_entry((int)eAssignOps::eSimpleAssign, 70);
-  assignOpsTable_.add_entry((int)eAssignOps::eBitAndAssign, 10);
-  assignOpsTable_.add_entry((int)eAssignOps::eBitXorAssign, 10);
-  assignOpsTable_.add_entry((int)eAssignOps::eBitOrAssign, 10);
-  if (CGOptions::pre_incr_operator())
-    assignOpsTable_.add_entry((int)eAssignOps::ePreIncr, 5);
-  if (CGOptions::pre_decr_operator())
-    assignOpsTable_.add_entry((int)eAssignOps::ePreDecr, 5);
-  if (CGOptions::post_incr_operator())
-    assignOpsTable_.add_entry((int)eAssignOps::ePostIncr, 5);
-  if (CGOptions::post_decr_operator()) {
-    assignOpsTable_.add_entry((int)eAssignOps::ePostDecr, 5);
-  }
+  assignOpsTable_.add_entry((int)eAssignOps::eMulAssign, 10);
+  assignOpsTable_.add_entry((int)eAssignOps::eDivAssign, 10);
+  assignOpsTable_.add_entry((int)eAssignOps::eRemAssign, 10);
+  assignOpsTable_.add_entry((int)eAssignOps::eAddAssign, 10);
+  assignOpsTable_.add_entry((int)eAssignOps::eSubAssign, 10);
 }
 
 eAssignOps StatementAssign::AssignOpsProbability(const Type *type) {
   if (!CGOptions::compound_assignment()) {
     return eAssignOps::eSimpleAssign;
   }
-  // First, floating point values do not apply to |=, &= and ^=.
-  // Second, similar to signed integers, we don't generate pre- or post-
-  // operators for floating point values. Instead, we will wrap all
-  // of these operations into safe_float_math later.
   if (type && (type->eType != eTypeDesc::eSimple || type->get_base_type()->is_float())) {
     return eAssignOps::eSimpleAssign;
   }
 
   VectorFilter filter(&assignOpsTable_);
-  if (type && type->is_signed()) {
-    filter.add(static_cast<unsigned int>(eAssignOps::ePreIncr))
-        .add(static_cast<unsigned int>(eAssignOps::ePreDecr))
-        .add(static_cast<unsigned int>(eAssignOps::ePostIncr))
-        .add(static_cast<unsigned int>(eAssignOps::ePostDecr));
-  }
-
   int value = rnd_upto(filter.get_max_prob(), &filter);
   return (eAssignOps)(filter.lookup(value));
 }
@@ -231,14 +213,7 @@ StatementAssign *StatementAssign::make_random(CGContext &cg_context,
 }
 
 bool StatementAssign::safe_assign(eAssignOps op) {
-  switch (op) {
-  case eAssignOps::eBitAndAssign: // fall-through
-  case eAssignOps::eBitXorAssign: // fall-through
-  case eAssignOps::eBitOrAssign:
-    return true;
-  default:
-    return false;
-  }
+  return false;
 }
 
 StatementAssign *StatementAssign::make_possible_compound_assign(
@@ -320,33 +295,6 @@ eBinaryOps StatementAssign::compound_to_binary_ops(eAssignOps op) {
     break;
   case eAssignOps::eRemAssign:
     bop = eBinaryOps::eMod;
-    break;
-  case eAssignOps::eBitAndAssign:
-    bop = eBinaryOps::eBitAnd;
-    break;
-  case eAssignOps::eBitXorAssign:
-    bop = eBinaryOps::eBitXor;
-    break;
-  case eAssignOps::eBitOrAssign:
-    bop = eBinaryOps::eBitOr;
-    break;
-  case eAssignOps::ePreDecr:
-    bop = eBinaryOps::eSub;
-    break;
-  case eAssignOps::ePostDecr:
-    bop = eBinaryOps::eSub;
-    break;
-  case eAssignOps::ePreIncr:
-    bop = eBinaryOps::eAdd;
-    break;
-  case eAssignOps::ePostIncr:
-    bop = eBinaryOps::eAdd;
-    break;
-  case eAssignOps::eLShiftAssign:
-    bop = eBinaryOps::eLShift;
-    break;
-  case eAssignOps::eRShiftAssign:
-    bop = eBinaryOps::eRShift;
     break;
   default:
     bop = MAX_BINARY_OP;
@@ -470,34 +418,6 @@ void StatementAssign::output_op(std::ostream &out) const {
   case eAssignOps::eSubAssign:
     out << "-=";
     break;
-  case eAssignOps::eLShiftAssign:
-    out << "<<=";
-    break;
-  case eAssignOps::eRShiftAssign:
-    out << ">>=";
-    break;
-  case eAssignOps::eBitAndAssign:
-    out << "&=";
-    break;
-  case eAssignOps::eBitXorAssign:
-    out << "^=";
-    break;
-  case eAssignOps::eBitOrAssign:
-    out << "|=";
-    break;
-
-  case eAssignOps::ePreIncr:
-    out << "++";
-    break;
-  case eAssignOps::ePreDecr:
-    out << "--";
-    break;
-  case eAssignOps::ePostIncr:
-    out << "++";
-    break;
-  case eAssignOps::ePostDecr:
-    out << "--";
-    break;
   }
 }
 
@@ -513,27 +433,11 @@ void StatementAssign::Output(std::ostream &out, FactMgr * /*fm*/,
 }
 
 void StatementAssign::OutputSimple(std::ostream &out) const {
-  switch (op) {
-  default:
-    lhs.Output(out);
-    out << " ";
-    output_op(out);
-    out << " ";
-    expr.Output(out);
-    break;
-
-  case eAssignOps::ePreIncr:
-  case eAssignOps::ePreDecr:
-    output_op(out);
-    lhs.Output(out);
-    break;
-
-  case eAssignOps::ePostIncr:
-  case eAssignOps::ePostDecr:
-    lhs.Output(out);
-    output_op(out);
-    break;
-  }
+  lhs.Output(out);
+  out << " ";
+  output_op(out);
+  out << " ";
+  expr.Output(out);
 }
 
 /*
@@ -543,51 +447,24 @@ void StatementAssign::OutputAsExpr(std::ostream &out) const {
   if (CGOptions::avoid_signed_overflow() && op_flags) {
     switch (op) {
 
-    case eAssignOps::eSimpleAssign:
-    case eAssignOps::eBitAndAssign:
-    case eAssignOps::eBitXorAssign:
-    case eAssignOps::eBitOrAssign: {
-      eBinaryOps bop = compound_to_binary_ops(op);
+    case eAssignOps::eSimpleAssign: {
       lhs.Output(out);
       out << " ";
-      if (CGOptions::ccomp() && (bop != MAX_BINARY_OP) && (lhs.is_volatile())) {
-        out << "=" << " ";
-        lhs.Output(out);
-        out << " " << FunctionInvocationBinary::get_binop_string(bop) << " ";
-        expr.Output(out);
-      } else {
-        output_op(out);
-        out << " ";
-        expr.Output(out);
-      }
+      output_op(out);
+      out << " ";
+      expr.Output(out);
       break;
     }
 
-    case eAssignOps::ePreIncr:
-      out << "++";
-      lhs.Output(out);
-      break;
-    case eAssignOps::ePreDecr:
-      out << "--";
-      lhs.Output(out);
-      break;
-    case eAssignOps::ePostIncr:
-      lhs.Output(out);
-      out << "++";
-      break;
-    case eAssignOps::ePostDecr:
-      lhs.Output(out);
-      out << "--";
-      break;
-
     case eAssignOps::eAddAssign:
-    case eAssignOps::eSubAssign: {
+    case eAssignOps::eSubAssign:
+    case eAssignOps::eMulAssign:
+    case eAssignOps::eDivAssign:
+    case eAssignOps::eRemAssign: {
       eBinaryOps bop = compound_to_binary_ops(op);
       assert(op_flags);
       string fname = op_flags->to_string(bop);
       int id = SafeOpFlags::to_id(fname);
-      // don't use safe math wrapper if this function is specified in
-      // "--safe-math-wrapper"
       if (!CGOptions::safe_math_wrapper(id)) {
         OutputSimple(out);
         return;
@@ -597,18 +474,12 @@ void StatementAssign::OutputAsExpr(std::ostream &out) const {
       if (CGOptions::math_notmp()) {
         out << tmp_var1 << ", ";
       }
-
       lhs.Output(out);
       out << ", ";
       if (CGOptions::math_notmp()) {
         out << tmp_var2 << ", ";
       }
-
-      if (op == eAssignOps::eAddAssign || op == eAssignOps::eSubAssign) {
-        expr.Output(out);
-      } else {
-        out << (CGOptions::mark_mutable_const() ? "(1)" : "1");
-      }
+      expr.Output(out);
       if (CGOptions::identify_wrappers()) {
         out << ", " << id;
       }

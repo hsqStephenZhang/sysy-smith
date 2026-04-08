@@ -69,10 +69,7 @@ FunctionInvocationBinary::CreateFunctionInvocationBinary(CGContext &cg_context,
 
     std::string tmp_var1 = blk->create_new_tmp_var(type1);
     std::string tmp_var2;
-    if (op == eBinaryOps::eLShift || op == eBinaryOps::eRShift)
-      tmp_var2 = blk->create_new_tmp_var(type2);
-    else
-      tmp_var2 = blk->create_new_tmp_var(type1);
+    tmp_var2 = blk->create_new_tmp_var(type1);
 
     fi = new FunctionInvocationBinary(op, flags, tmp_var1, tmp_var2);
   } else {
@@ -142,8 +139,6 @@ bool FunctionInvocationBinary::safe_ops(eBinaryOps op) {
   case eBinaryOps::eMul:
   case eBinaryOps::eMod:
   case eBinaryOps::eDiv:
-  case eBinaryOps::eLShift:
-  case eBinaryOps::eRShift:
     return true;
   default:
     return false;
@@ -155,12 +150,12 @@ bool FunctionInvocationBinary::equals(int num) const {
   assert(param_value.size() == 2);
   if (num == 0) {
     if (param_value[0]->equals(0) &&
-        (eFunc == eBinaryOps::eMul || eFunc == eBinaryOps::eDiv || eFunc == eBinaryOps::eMod || eFunc == eBinaryOps::eLShift ||
-         eFunc == eBinaryOps::eRShift || eFunc == eBinaryOps::eAnd || eFunc == eBinaryOps::eBitAnd)) {
+        (eFunc == eBinaryOps::eMul || eFunc == eBinaryOps::eDiv || eFunc == eBinaryOps::eMod ||
+         eFunc == eBinaryOps::eAnd)) {
       return true;
     }
     if (param_value[1]->equals(0) &&
-        (eFunc == eBinaryOps::eMul || eFunc == eBinaryOps::eAnd || eFunc == eBinaryOps::eBitAnd)) {
+        (eFunc == eBinaryOps::eMul || eFunc == eBinaryOps::eAnd)) {
       return true;
     }
     if (param_value[0] == param_value[1] &&
@@ -202,19 +197,6 @@ const Type &FunctionInvocationBinary::get_type(void) const {
   case eBinaryOps::eMul:
   case eBinaryOps::eDiv:
   case eBinaryOps::eMod:
-  case eBinaryOps::eBitXor:
-  case eBinaryOps::eBitAnd:
-  case eBinaryOps::eBitOr: {
-    const Type &l_type = param_value[0]->get_type();
-    const Type &r_type = param_value[1]->get_type();
-    // XXX --- not really right!
-    if ((l_type.is_signed()) && (r_type.is_signed())) {
-      return Type::get_simple_type(eSimpleType::eInt);
-    } else {
-      return Type::get_simple_type(eSimpleType::eUInt);
-    }
-  } break;
-
   case eBinaryOps::eCmpGt:
   case eBinaryOps::eCmpLt:
   case eBinaryOps::eCmpGe:
@@ -226,16 +208,6 @@ const Type &FunctionInvocationBinary::get_type(void) const {
     return Type::get_simple_type(eSimpleType::eInt);
     break;
 
-  case eBinaryOps::eRShift:
-  case eBinaryOps::eLShift: {
-    const Type &l_type = param_value[0]->get_type();
-    // XXX --- not really right!
-    if (l_type.is_signed()) {
-      return Type::get_simple_type(eSimpleType::eInt);
-    } else {
-      return Type::get_simple_type(eSimpleType::eUInt);
-    }
-  } break;
   }
   assert(0);
   return Type::get_simple_type(eSimpleType::eInt);
@@ -291,22 +263,6 @@ static void OutputStandardFuncName(eBinaryOps eFunc, std::ostream &out) {
     out << ">=";
     break;
 
-    // Bitwise Ops
-  case eBinaryOps::eBitAnd:
-    out << "&";
-    break;
-  case eBinaryOps::eBitOr:
-    out << "|";
-    break;
-  case eBinaryOps::eBitXor:
-    out << "^";
-    break;
-  case eBinaryOps::eLShift:
-    out << "<<";
-    break;
-  case eBinaryOps::eRShift:
-    out << ">>";
-    break;
   }
 }
 
@@ -327,15 +283,6 @@ std::string FunctionInvocationBinary::get_binop_string(eBinaryOps bop) {
     break;
   case eBinaryOps::eMod:
     op_string = "%";
-    break;
-  case eBinaryOps::eBitAnd:
-    op_string = "&";
-    break;
-  case eBinaryOps::eBitXor:
-    op_string = "^";
-    break;
-  case eBinaryOps::eBitOr:
-    op_string = "|";
     break;
   default:
     assert(0);
@@ -365,8 +312,6 @@ void FunctionInvocationBinary::Output(std::ostream &out) const {
     case eBinaryOps::eMul:
     case eBinaryOps::eMod:
     case eBinaryOps::eDiv:
-    case eBinaryOps::eLShift:
-    case eBinaryOps::eRShift:
       if (CGOptions::avoid_signed_overflow()) {
         string fname = op_flags->to_string(eFunc);
         int id = SafeOpFlags::to_id(fname);
@@ -445,8 +390,6 @@ void FunctionInvocationBinary::indented_output(std::ostream &out,
     case eBinaryOps::eMul:
     case eBinaryOps::eMod:
     case eBinaryOps::eDiv:
-    case eBinaryOps::eLShift:
-    case eBinaryOps::eRShift:
       if (CGOptions::avoid_signed_overflow()) {
         output_tab(out, indent);
         out << op_flags->to_string(eFunc);

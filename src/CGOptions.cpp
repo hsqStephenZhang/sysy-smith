@@ -214,7 +214,7 @@ void CGOptions::set_default_builtin_kinds() {
 
 void CGOptions::set_default_settings(void) {
   set_platform_specific_options();
-  compute_hash(true);
+  compute_hash(false);
   max_funcs(CGOPTIONS_DEFAULT_MAX_SPLIT_FILES);
   max_funcs(CGOPTIONS_DEFAULT_MAX_FUNCS);
   max_params(CGOPTIONS_DEFAULT_MAX_PARAMS);
@@ -236,7 +236,7 @@ void CGOptions::set_default_settings(void) {
   interested_facts(static_cast<int>(eFactCategory::ePointTo) |
                    static_cast<int>(eFactCategory::eUnionWrite));
   allow_const_volatile(true);
-  avoid_signed_overflow(true);
+  avoid_signed_overflow(false);
   CGOptions::paranoid(false);
   CGOptions::quiet(false);
   CGOptions::concise(false);
@@ -266,7 +266,7 @@ void CGOptions::set_default_settings(void) {
   enable_float(false);
   strict_float(false);
   pointers(true);
-  arrays(true);
+  arrays(false);
   strict_const_arrays(false);
   jumps(true);
   return_structs(true);

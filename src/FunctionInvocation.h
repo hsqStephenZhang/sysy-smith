@@ -60,19 +60,9 @@ enum class eUnaryOps {
   ePlus,
   eMinus,
   eNot,
-  eBitNot
-#if 0  // TODO --- to be implemented
-	ePreInc,
-	ePreDec,
-	ePostInc,
-	ePostDec
-#endif // 0
 };
 inline constexpr unsigned int MAX_UNARY_OP =
-    static_cast<unsigned int>(eUnaryOps::eBitNot) + 1;
-#if 0 // TODO --- to be implemented
-inline constexpr eUnaryOps MAX_UNARY_OP = static_cast<eUnaryOps>(ePostDec + 1);
-#endif
+    static_cast<unsigned int>(eUnaryOps::eNot) + 1;
 
 enum class eBinaryOps {
   eAdd,
@@ -88,15 +78,9 @@ enum class eBinaryOps {
   eCmpNe,
   eAnd,
   eOr,
-  eBitXor,
-  eBitAnd,
-  eBitOr,
-  eRShift,
-  eLShift
 };
 inline constexpr eBinaryOps MAX_BINARY_OP =
-    static_cast<eBinaryOps>(static_cast<unsigned int>(eBinaryOps::eLShift) +
-                            1);
+    static_cast<eBinaryOps>(static_cast<unsigned int>(eBinaryOps::eOr) + 1);
 
 enum class eInvocationType { eBinaryPrim, eUnaryPrim, eFuncCall };
 

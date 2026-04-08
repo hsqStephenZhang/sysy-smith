@@ -302,12 +302,6 @@ std::string SafeOpFlags::to_string(eBinaryOps op) const {
   case eBinaryOps::eDiv:
     s = "safe_div_";
     break;
-  case eBinaryOps::eLShift:
-    s = "safe_lshift_";
-    break;
-  case eBinaryOps::eRShift:
-    s = "safe_rshift_";
-    break;
   default:
     break;
   }
@@ -315,7 +309,7 @@ std::string SafeOpFlags::to_string(eBinaryOps op) const {
   OutputFuncOrMacro(oss);
   OutputSize(oss);
   OutputOp1(oss);
-  (op == eBinaryOps::eLShift || op == eBinaryOps::eRShift) ? OutputOp2(oss) : OutputOp1(oss);
+  OutputOp1(oss);
   s += oss.str();
   return s;
 }

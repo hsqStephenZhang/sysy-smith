@@ -58,18 +58,9 @@ enum class eAssignOps {
   eRemAssign,
   eAddAssign,
   eSubAssign,
-  eLShiftAssign,
-  eRShiftAssign,
-  eBitAndAssign,
-  eBitXorAssign,
-  eBitOrAssign,
-  ePreIncr,
-  ePreDecr,
-  ePostIncr,
-  ePostDecr
 };
 inline constexpr eAssignOps MAX_ASSIGN_OP =
-    static_cast<eAssignOps>(static_cast<unsigned int>(eAssignOps::ePostDecr) +
+    static_cast<eAssignOps>(static_cast<unsigned int>(eAssignOps::eSubAssign) +
                             1);
 
 /*
@@ -98,10 +89,7 @@ public:
 
   static void InitProbabilityTable();
   static bool safe_assign(eAssignOps op);
-  static bool need_no_rhs(eAssignOps op) {
-    return op == eAssignOps::ePreIncr || op == eAssignOps::ePreDecr ||
-           op == eAssignOps::ePostIncr || op == eAssignOps::ePostDecr;
-  }
+  static bool need_no_rhs(eAssignOps /*op*/) { return false; }
 
   bool is_simple_assign(void) const { return op == eAssignOps::eSimpleAssign; }
 

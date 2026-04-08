@@ -119,7 +119,6 @@ const Type &FunctionInvocationUnary::get_type(void) const {
 
   case eUnaryOps::ePlus:
   case eUnaryOps::eMinus:
-  case eUnaryOps::eBitNot:
     return param_value[0]->get_type();
     break;
 
@@ -175,10 +174,6 @@ static void OutputStandardFuncName(eUnaryOps eFunc, std::ostream &out) {
     out << "!";
     break;
 
-    // Bitwise Ops
-  case eUnaryOps::eBitNot:
-    out << "~";
-    break;
   }
 }
 
@@ -228,7 +223,6 @@ void FunctionInvocationUnary::Output(std::ostream &out) const {
 
   case eUnaryOps::ePlus:
   case eUnaryOps::eNot:
-  case eUnaryOps::eBitNot:
     OutputStandardFuncName(eFunc, out);
     // explicit type casting for op1
     if (need_cast) {
@@ -265,7 +259,6 @@ void FunctionInvocationUnary::indented_output(std::ostream &out,
 
   case eUnaryOps::ePlus:
   case eUnaryOps::eNot:
-  case eUnaryOps::eBitNot:
     OutputStandardFuncName(eFunc, out);
     param_value[0]->indented_output(out, indent);
     break;

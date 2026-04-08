@@ -233,30 +233,16 @@ FunctionInvocation::make_random_binary(CGContext &cg_context,
     Effect rhs_eff_accum;
 
     CGContext rhs_cg_context(cg_context, rhs_eff_context, &rhs_eff_accum);
-    if (op == eBinaryOps::eLShift || op == eBinaryOps::eRShift) {
-      eTermType tt = MAX_TERM_TYPES;
-      bool not_constant = rnd_flipcoin(ShiftByNonConstantProb());
-      // avoid shifting negative or too much
-      if (!not_constant) {
-        rhs = Constant::make_random_upto(lhs_type->SizeInBytes() * 8);
-      } else {
-        rhs = Expression::make_random(rhs_cg_context, rhs_type, nullptr, false,
-                                      true, tt);
-      }
-    } else {
-      rhs = Expression::make_random(rhs_cg_context, rhs_type);
-      // avoid divide by zero or possible zero (reached by pointer comparison)
-      if ((op == eBinaryOps::eMod || op == eBinaryOps::eDiv) && (rhs->equals(0) || rhs->is_0_or_1()) &&
-          !lhs_type->is_float() && !rhs_type->is_float()) {
-        VectorFilter f;
-        f.add(static_cast<unsigned int>(eBinaryOps::eMod))
-            .add(static_cast<unsigned int>(eBinaryOps::eDiv))
-            .add(static_cast<unsigned int>(eBinaryOps::eLShift))
-            .add(static_cast<unsigned int>(eBinaryOps::eRShift));
-        op = static_cast<eBinaryOps>(
-            rnd_upto(static_cast<unsigned int>(MAX_BINARY_OP), &f));
-        fi->set_operation(op);
-      }
+    rhs = Expression::make_random(rhs_cg_context, rhs_type);
+    // avoid divide by zero or possible zero (reached by pointer comparison)
+    if ((op == eBinaryOps::eMod || op == eBinaryOps::eDiv) && (rhs->equals(0) || rhs->is_0_or_1()) &&
+        !lhs_type->is_float() && !rhs_type->is_float()) {
+      VectorFilter f;
+      f.add(static_cast<unsigned int>(eBinaryOps::eMod))
+          .add(static_cast<unsigned int>(eBinaryOps::eDiv));
+      op = static_cast<eBinaryOps>(
+          rnd_upto(static_cast<unsigned int>(MAX_BINARY_OP), &f));
+      fi->set_operation(op);
     }
     cg_context.merge_param_context(rhs_cg_context, true);
   }

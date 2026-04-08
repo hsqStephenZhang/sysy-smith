@@ -103,19 +103,9 @@ static void make_random_loop_control(int &init, int &limit, int &incr,
     // Do `++' or `--', pre- or post-.
     // make sure the limit can be reached without wrap-around
     if ((limit < init) || ((limit == init) && (test_op == eBinaryOps::eCmpGe))) {
-      incr_op = pure_rnd_flipcoin(50) ? eAssignOps::ePreDecr : eAssignOps::ePostDecr;
-    } else {
-      incr_op = pure_rnd_flipcoin(50) ? eAssignOps::ePreIncr : eAssignOps::ePostIncr;
-    }
-    if (((incr_op == eAssignOps::ePreIncr) && !CGOptions::pre_incr_operator()) ||
-        ((incr_op == eAssignOps::ePostIncr) && !CGOptions::post_incr_operator())) {
-
-      incr_op = eAssignOps::eAddAssign;
-    }
-    if (((incr_op == eAssignOps::ePreDecr) && !CGOptions::pre_decr_operator()) ||
-        ((incr_op == eAssignOps::ePostDecr) && !CGOptions::post_decr_operator())) {
-
       incr_op = eAssignOps::eSubAssign;
+    } else {
+      incr_op = eAssignOps::eAddAssign;
     }
     incr = 1;
   }

@@ -103,52 +103,11 @@ void OutputMgr::OutputMain(std::ostream &out) {
   // output initializers for global array variables
   OutputArrayInitializers(*VariableSelector::GetGlobalVariables(), out, 1);
 
-  if (CGOptions::blind_check_global()) {
-    ExtensionMgr::OutputFirstFunInvocation(out, invoke);
-    std::vector<Variable *> &vars = *VariableSelector::GetGlobalVariables();
-    for (size_t i = 0; i < vars.size(); i++) {
-      vars[i]->output_value_dump(out, "checksum ", 1);
-    }
-  } else {
-    // set up a global variable that controls if we print the hash value after
-    // computing it for each global
-    out << "    int print_hash_value = 0;" << endl;
-    if (CGOptions::accept_argc()) {
-      out << "    if (argc == 2 && strcmp(argv[1], \"1\") == 0) "
-             "print_hash_value = 1;"
-          << endl;
-    }
-
-    out << "    platform_main_begin();" << endl;
-    if (CGOptions::compute_hash()) {
-      out << "    crc32_gentab();" << endl;
-    }
-
-    ExtensionMgr::OutputFirstFunInvocation(out, invoke);
-
-#if 0
-		out << "    ";
-		invoke->Output(out);
-		out << ";" << endl;
-#endif
-    // resetting all global dangling pointer to null per Rohit's request
-    if (!CGOptions::dangling_global_ptrs()) {
-      OutputPtrResets(out, GetFirstFunction()->dead_globals);
-    }
-
-    if (CGOptions::step_hash_by_stmt())
-      OutputMgr::OutputHashFuncInvocation(out, 1);
-    else
-      HashGlobalVariables(out);
-    if (CGOptions::compute_hash()) {
-      out << "    platform_main_end(crc32_context ^ 0xFFFFFFFFUL, "
-             "print_hash_value);"
-          << endl;
-    } else {
-      out << "    platform_main_end(0,0);" << endl;
-    }
+  ExtensionMgr::OutputFirstFunInvocation(out, invoke);
+  if (!CGOptions::dangling_global_ptrs()) {
+    OutputPtrResets(out, GetFirstFunction()->dead_globals);
   }
-  ExtensionMgr::OutputTail(out);
+  out << "    return 0;" << endl;
   out << "}" << endl;
   delete invoke;
 }
@@ -264,51 +223,6 @@ void OutputMgr::OutputHeader(int argc, char *argv[], unsigned long seed) {
     out << endl;
   }
 
-  if (!CGOptions::longlong()) {
-    out << endl;
-    out << "#define NO_LONGLONG" << std::endl;
-    out << endl;
-  }
-  if (CGOptions::enable_float()) {
-    out << "#include <float.h>\n";
-    out << "#include <math.h>\n";
-  }
-
-  ExtensionMgr::OutputHeader(out);
-
-  out << runtime_include << endl;
-
-  if (!CGOptions::compute_hash()) {
-    if (CGOptions::allow_int64())
-      out << "volatile uint64_t " << Variable::sink_var_name << " = 0;" << endl;
-    else
-      out << "volatile uint32_t " << Variable::sink_var_name << " = 0;" << endl;
-  }
-  out << endl;
-
-  out << "static long __undefined;" << endl;
-  out << endl;
-
-  if (CGOptions::depth_protect()) {
-    out << "#define MAX_DEPTH (5)" << endl;
-    // Make depth signed, to cover our tails.
-    out << "int32_t DEPTH = 0;" << endl;
-    out << endl;
-  }
-
-  // out << platform_include << endl;
-  if (CGOptions::wrap_volatiles()) {
-    out << volatile_include << endl;
-  }
-
-  if (CGOptions::access_once()) {
-    out << access_once_macro << endl;
-  }
-
-  if (CGOptions::step_hash_by_stmt()) {
-    OutputMgr::OutputHashFuncDecl(out);
-    OutputMgr::OutputStepHashFuncDecl(out);
-  }
 }
 
 void OutputMgr::output_comment_line(ostream &out, const std::string &comment) {
