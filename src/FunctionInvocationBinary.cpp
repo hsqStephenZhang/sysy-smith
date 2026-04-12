@@ -336,26 +336,13 @@ void FunctionInvocationBinary::Output(std::ostream &out) const {
           break;
         }
       }
-      need_cast = true;
       // fallthrough!
 
     default:
-      // explicit type casting for op1
-      if (need_cast) {
-        out << "(";
-        op_flags->OutputSize(out);
-        out << ")";
-      }
       param_value[0]->Output(out);
       out << " ";
       OutputStandardFuncName(eFunc, out);
       out << " ";
-      // explicit type casting for op2
-      if (need_cast) {
-        out << "(";
-        op_flags->OutputSize(out);
-        out << ")";
-      }
       param_value[1]->Output(out);
       break;
     }

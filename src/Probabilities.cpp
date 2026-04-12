@@ -610,62 +610,21 @@ void Probabilities::set_default_safe_ops_size_prob() {
 void Probabilities::set_default_simple_types_prob() {
   std::map<ProbName, int> m;
 
-  // each op has equivalent probability
-
-  // We only use void for function's parameter, so
-  // disallow choosing void type from other places
+  // SysY only has int; all other types are disabled
   SET_SINGLE_NAME("void_prob", Void, 0);
-  if (CGOptions::int8()) {
-    SET_SINGLE_NAME("char_prob", Char, 1);
-  } else {
-    SET_SINGLE_NAME("char_prob", Char, 0);
-  }
-
-  if (CGOptions::Int128()) {
-    SET_SINGLE_NAME("Int128_prob", Int128, 1);
-  } else {
-    SET_SINGLE_NAME("Int128_prob", Int128, 0);
-  }
-
-  if (CGOptions::UInt128()) {
-    SET_SINGLE_NAME("UInt128_prob", UInt128, 1);
-  } else {
-    SET_SINGLE_NAME("UInt128_prob", UInt128, 0);
-  }
-
+  SET_SINGLE_NAME("char_prob", Char, 0);
+  SET_SINGLE_NAME("Int128_prob", Int128, 0);
+  SET_SINGLE_NAME("UInt128_prob", UInt128, 0);
   SET_SINGLE_NAME("int_prob", Int, 1);
-  SET_SINGLE_NAME("short_prob", Short, 1);
-
-  if (CGOptions::ccomp()) {
-    SET_SINGLE_NAME("long_prob", Long, 0);
-    SET_SINGLE_NAME("ulong_prob", ULong, 0);
-  } else {
-    SET_SINGLE_NAME("long_prob", Long, 1);
-    SET_SINGLE_NAME("ulong_prob", ULong, 1);
-  }
-
-  if (CGOptions::uint8()) {
-    SET_SINGLE_NAME("uchar_prob", UChar, 1);
-  } else {
-    SET_SINGLE_NAME("uchar_prob", UChar, 0);
-  }
-
-  SET_SINGLE_NAME("uint_prob", UInt, 1);
-  SET_SINGLE_NAME("ushort_prob", UShort, 1);
-
-  if (CGOptions::allow_int64()) {
-    SET_SINGLE_NAME("long_long_prob", LongLong, 1);
-    SET_SINGLE_NAME("ulong_long_prob", ULongLong, 1);
-  } else {
-    SET_SINGLE_NAME("long_long_prob", LongLong, 0);
-    SET_SINGLE_NAME("ulong_long_prob", ULongLong, 0);
-  }
-
-  if (CGOptions::enable_float()) {
-    SET_SINGLE_NAME("float_prob", Float, 1);
-  } else {
-    SET_SINGLE_NAME("float_prob", Float, 0);
-  }
+  SET_SINGLE_NAME("short_prob", Short, 0);
+  SET_SINGLE_NAME("long_prob", Long, 0);
+  SET_SINGLE_NAME("ulong_prob", ULong, 0);
+  SET_SINGLE_NAME("uchar_prob", UChar, 0);
+  SET_SINGLE_NAME("uint_prob", UInt, 0);
+  SET_SINGLE_NAME("ushort_prob", UShort, 0);
+  SET_SINGLE_NAME("long_long_prob", LongLong, 0);
+  SET_SINGLE_NAME("ulong_long_prob", ULongLong, 0);
+  SET_SINGLE_NAME("float_prob", Float, 0);
 
   set_group_prob(true, ProbName::pSimpleTypesProb, m);
   set_prob_filter(ProbName::pSimpleTypesProb);

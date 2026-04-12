@@ -98,28 +98,12 @@ string HexToBinary(const string &val) {
 
 // --------------------------------------------------------------
 static string GenerateRandomCharConstant(void) {
-  string ch;
-  if (CGOptions::binary_constant() && rnd_flipcoin(BinaryConstProb())) {
-    ch = string("0b") + HexToBinary(RandomHexDigits(2));
-  } else if (CGOptions::ccomp() || !CGOptions::longlong())
-    ch = string("0x") + RandomHexDigits(2);
-  else
-    ch = string("0x") + RandomHexDigits(2) + "L";
-  return ch;
+  return std::to_string((int)(signed char)pure_rnd_upto(256));
 }
 
 // --------------------------------------------------------------
 static string GenerateRandomIntConstant(void) {
-  string val;
-  // Int constant - Max 8 Hex digits on 32-bit platforms
-  if (CGOptions::binary_constant() && rnd_flipcoin(BinaryConstProb())) {
-    val = string("0b") + HexToBinary(RandomHexDigits(8));
-  } else if (CGOptions::ccomp() || !CGOptions::longlong())
-    val = "0x" + RandomHexDigits(8);
-  else
-    val = "0x" + RandomHexDigits(8) + "L";
-
-  return val;
+  return std::to_string((int32_t)pure_rnd_upto(2147483648ULL));
 }
 
 // --------------------------------------------------------------
@@ -350,14 +334,7 @@ static string GenerateRandomConstant(const Type *type) {
         oss << num;
         break;
       }
-      if (type->simple_type == eSimpleType::eFloat) {
-        v = oss.str();
-      } else {
-        if (CGOptions::ccomp() || !CGOptions::longlong())
-          v = oss.str() + (type->is_signed() ? "" : "U");
-        else
-          v = oss.str() + (type->is_signed() ? "L" : "UL");
-      }
+      v = oss.str();
     } else {
       switch (st) {
       case eSimpleType::eVoid:

@@ -143,14 +143,8 @@ SafeOpFlags *SafeOpFlags::make_random_unary(const Type *rv_type,
   assert("new SafeOpFlags fail!");
   bool rv_is_float = return_float_type(rv_type, op1_type, uop);
 
-  // floating point is always signed
-  if (rv_is_float) {
-    assert(FunctionInvocation::UnaryOpWorksForFloat(uop) && "Invalid unary op");
-    flags->op1_ = true;
-  } else {
-    flags->op1_ = rnd_flipcoin(SafeOpsSignedProb());
-  }
-  flags->op2_ = flags->op1_;
+  flags->op1_ = true;
+  flags->op2_ = true;
 
   // ISSUE: in the old code, is_func is always true
   // Probably need to be fixed later.
@@ -159,9 +153,7 @@ SafeOpFlags *SafeOpFlags::make_random_unary(const Type *rv_type,
     assert(CGOptions::enable_float());
     flags->op_size_ = SafeOpSize::sFloat;
   } else {
-    flags->op_size_ = static_cast<SafeOpSize>(
-        rnd_upto(static_cast<unsigned int>(MAX_SAFE_OP_SIZE) - 1,
-                 SAFE_OPS_SIZE_PROB_FILTER()));
+    flags->op_size_ = SafeOpSize::sInt32;
   }
   return flags;
 }
@@ -177,27 +169,8 @@ SafeOpFlags *SafeOpFlags::make_random_binary(const Type *rv_type,
   assert("new SafeOpFlags fail!");
   bool rv_is_float = return_float_type(rv_type, op1_type, op2_type, bop);
 
-  // floating point is always signed
-  if (rv_is_float) {
-    if (op_kind == SafeOpKind::sOpBinary) {
-      assert(FunctionInvocation::BinaryOpWorksForFloat(bop) &&
-             "Invalid binary op");
-    }
-    flags->op1_ = true;
-  } else {
-    flags->op1_ = rnd_flipcoin(SafeOpsSignedProb());
-  }
-  ERROR_GUARD_AND_DEL1(nullptr, flags);
-
-  if (op_kind == SafeOpKind::sOpBinary) {
-    if (rv_is_float)
-      flags->op2_ = true;
-    else
-      flags->op2_ = rnd_flipcoin(SafeOpsSignedProb());
-    ERROR_GUARD_AND_DEL1(nullptr, flags);
-  } else {
-    flags->op2_ = flags->op1_;
-  }
+  flags->op1_ = true;
+  flags->op2_ = true;
 
   // ISSUE: in the old code, is_func is always true
   // Probably need to be fixed later.
@@ -207,9 +180,7 @@ SafeOpFlags *SafeOpFlags::make_random_binary(const Type *rv_type,
     assert(CGOptions::enable_float());
     flags->op_size_ = SafeOpSize::sFloat;
   } else {
-    flags->op_size_ = static_cast<SafeOpSize>(
-        rnd_upto(static_cast<unsigned int>(MAX_SAFE_OP_SIZE) - 1,
-                 SAFE_OPS_SIZE_PROB_FILTER()));
+    flags->op_size_ = SafeOpSize::sInt32;
   }
   return flags;
 }

@@ -181,7 +181,8 @@ void DefaultOutputMgr::Output() {
   } else {
     OutputStructUnionDeclarations(out);
     OutputGlobalVariables(out);
-    OutputForwardDeclarations(out);
+    if (!CGOptions::no_forward_decls())
+      OutputForwardDeclarations(out);
     OutputFunctions(out);
   }
   if (CGOptions::step_hash_by_stmt()) {

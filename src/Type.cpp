@@ -1661,10 +1661,10 @@ void Type::Output(std::ostream &out) const {
       out << "__int" << (SizeInBytes() * 8);
     } else if (this->simple_type == eSimpleType::eUInt128) {
       out << "unsigned __int" << (SizeInBytes() * 8);
+    } else if (this->simple_type == eSimpleType::eChar) {
+      out << "char";
     } else {
-      out << (is_signed() ? "int" : "uint");
-      out << (SizeInBytes() * 8);
-      out << "_t";
+      out << "int";
     }
     break;
   case eTypeDesc::ePointer:

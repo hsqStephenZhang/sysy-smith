@@ -161,6 +161,7 @@ DEFINE_GETTER_SETTER_BOOL(dangling_global_ptrs)
 DEFINE_GETTER_SETTER_BOOL(divs)
 DEFINE_GETTER_SETTER_BOOL(muls)
 DEFINE_GETTER_SETTER_BOOL(accept_argc)
+DEFINE_GETTER_SETTER_BOOL(no_forward_decls)
 DEFINE_GETTER_SETTER_BOOL(random_random)
 DEFINE_GETTER_SETTER_INT(stop_by_stmt)
 DEFINE_GETTER_SETTER_BOOL(step_hash_by_stmt)
@@ -235,15 +236,15 @@ void CGOptions::set_default_settings(void) {
   output_file(CGOPTIONS_DEFAULT_OUTPUT_FILE);
   interested_facts(static_cast<int>(eFactCategory::ePointTo) |
                    static_cast<int>(eFactCategory::eUnionWrite));
-  allow_const_volatile(true);
+  allow_const_volatile(false);
   avoid_signed_overflow(false);
   CGOptions::paranoid(false);
   CGOptions::quiet(false);
   CGOptions::concise(false);
   CGOptions::nomain(false);
   random_based(true);
-  use_struct(true);
-  use_union(true);
+  use_struct(false);
+  use_union(false);
   compact_output(false);
   func1_max_params(CGOPTIONS_DEFAULT_FUNC1_MAX_PARAMS);
   klee(false);
@@ -256,7 +257,7 @@ void CGOptions::set_default_settings(void) {
   prefix_name(false);
   sequence_name_prefix(false);
   compatible_check(false);
-  compound_assignment(true);
+  compound_assignment(false);
   math64(true);
   inline_function(false);
   math_notmp(false);
@@ -265,23 +266,24 @@ void CGOptions::set_default_settings(void) {
   uint8(true);
   enable_float(false);
   strict_float(false);
-  pointers(true);
+  pointers(false);
   arrays(false);
   strict_const_arrays(false);
   jumps(true);
-  return_structs(true);
-  arg_structs(true);
-  return_unions(true);
-  arg_unions(true);
-  volatiles(true);
-  volatile_pointers(true);
-  const_pointers(true);
+  return_structs(false);
+  arg_structs(false);
+  return_unions(false);
+  arg_unions(false);
+  volatiles(false);
+  volatile_pointers(false);
+  const_pointers(false);
   global_variables(true);
-  consts(true);
+  consts(false);
   dangling_global_ptrs(true);
   divs(true);
   muls(true);
   accept_argc(true);
+  no_forward_decls(true);
   stop_by_stmt(-1);
   step_hash_by_stmt(false);
   const_as_condition(false);
@@ -292,7 +294,7 @@ void CGOptions::set_default_settings(void) {
   signed_char_index(true);
   identify_wrappers(false);
   mark_mutable_const(false);
-  force_globals_static(true);
+  force_globals_static(false);
   force_non_uniform_array_init(true);
   max_array_num_in_loop(CGOPTIONS_DEFAULT_MAX_ARRAY_NUM_IN_LOOP);
   inline_function_prob(50);
@@ -304,8 +306,8 @@ void CGOptions::set_default_settings(void) {
   post_incr_operator(true);
   post_decr_operator(true);
   unary_plus_operator(true);
-  use_embedded_assigns(true);
-  use_comma_exprs(true);
+  use_embedded_assigns(false);
+  use_comma_exprs(false);
   take_union_field_addr(true);
   vol_struct_union_fields(true);
   const_struct_union_fields(true);

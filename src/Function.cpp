@@ -44,6 +44,8 @@
 #include "Function.h"
 
 #include <cassert>
+#include <functional>
+#include <unordered_set>
 
 #include "Attribute.h"
 #include "Block.h"
@@ -59,6 +61,7 @@
 #include "FactMgr.h"
 #include "FactPointTo.h"
 #include "OutputMgr.h"
+#include "FunctionInvocationUser.h"
 #include "Statement.h"
 #include "Type.h"
 #include "VariableSelector.h"
@@ -500,8 +503,7 @@ static int OutputFormalParam(Variable *var, std::ostream *pOut) {
  */
 void Function::OutputFormalParamList(std::ostream &out) {
   if (param.size() == 0) {
-    assert(Type::void_type);
-    Type::void_type->Output(out);
+    // empty parameter list — SysY uses () not (void)
   } else {
     param_first = true;
     for (auto i = param.begin(); i != param.end(); ++i) {
@@ -834,8 +836,40 @@ void OutputFunctions(std::ostream &out) {
   outputln(out);
   outputln(out);
   output_comment_line(out, "--- FUNCTIONS ---");
-  for (auto i = FuncList.begin(); i != FuncList.end(); ++i) {
-    (*i)->Output(out);
+
+  if (CGOptions::no_forward_decls()) {
+    // Topological sort: output each callee before its callers using DFS post-order.
+    unordered_set<const Function *> visited;
+    vector<const Function *> order;
+
+    std::function<void(const Function *)> dfs = [&](const Function *f) {
+      if (visited.count(f))
+        return;
+      visited.insert(f);
+      if (f->body) {
+        vector<const FunctionInvocationUser *> calls;
+        f->body->get_called_funcs(calls);
+        for (auto *call : calls) {
+          const Function *callee = call->get_func();
+          if (callee && !callee->is_builtin)
+            dfs(callee);
+        }
+      }
+      order.push_back(f);
+    };
+
+    for (auto *f : FuncList) {
+      if (!f->is_builtin)
+        dfs(f);
+    }
+
+    for (auto *f : order) {
+      const_cast<Function *>(f)->Output(out);
+    }
+  } else {
+    for (auto i = FuncList.begin(); i != FuncList.end(); ++i) {
+      (*i)->Output(out);
+    }
   }
 }
 

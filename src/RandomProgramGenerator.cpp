@@ -163,6 +163,11 @@ static void print_help() {
           "argc being passed (enabled by default)."
        << endl
        << endl;
+  cout << "  --no-forward-decls | --forward-decls: suppress forward "
+          "declarations and emit functions in dependency order | emit forward "
+          "declarations (no-forward-decls is the default)."
+       << endl
+       << endl;
   cout << "  --arrays | --no-arrays: enable | disable arrays (enabled by "
           "default)."
        << endl
@@ -927,6 +932,16 @@ int main(int argc, char **argv) {
 
     if (strcmp(argv[i], "--no-argc") == 0) {
       CGOptions::accept_argc(false);
+      continue;
+    }
+
+    if (strcmp(argv[i], "--no-forward-decls") == 0) {
+      CGOptions::no_forward_decls(true);
+      continue;
+    }
+
+    if (strcmp(argv[i], "--forward-decls") == 0) {
+      CGOptions::no_forward_decls(false);
       continue;
     }
 

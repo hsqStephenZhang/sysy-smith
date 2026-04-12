@@ -318,6 +318,9 @@ public:
   static bool accept_argc(void);
   static bool accept_argc(bool p);
 
+  static bool no_forward_decls(void);
+  static bool no_forward_decls(bool p);
+
   static bool random_random(void);
   static bool random_random(bool p);
 
@@ -581,6 +584,7 @@ private:
   static bool divs_;
   static bool muls_;
   static bool accept_argc_;
+  static bool no_forward_decls_;
   static bool random_random_;
   static bool const_as_condition_;
   static bool no_return_dead_ptr_;

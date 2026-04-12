@@ -218,18 +218,11 @@ void FunctionInvocationUnary::Output(std::ostream &out) const {
         break;
       }
     }
-    need_cast = true;
     // Fallthrough!
 
   case eUnaryOps::ePlus:
   case eUnaryOps::eNot:
     OutputStandardFuncName(eFunc, out);
-    // explicit type casting for op1
-    if (need_cast) {
-      out << "(";
-      op_flags->OutputSize(out);
-      out << ")";
-    }
     param_value[0]->Output(out);
     break;
   }
