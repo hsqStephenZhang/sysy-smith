@@ -203,23 +203,23 @@ if(NOT HAVE_LRAND48)
     )
 endif()
 
-add_executable(csmith
+add_executable(sysy-smith
   ${csmith_SOURCES}
   )
 
 # Use C++20.
-set_target_properties(csmith PROPERTIES
+set_target_properties(sysy-smith PROPERTIES
   CXX_STANDARD 20
   CXX_EXTENSIONS NO
   )
 # CXX_STANDARD_REQUIRED YES
 
 if(BSD_LIBRARY)
-  target_link_libraries(csmith "${BSD_LIBRARY}")
+  target_link_libraries(sysy-smith "${BSD_LIBRARY}")
 endif()
 
 install(TARGETS
-  csmith
+  sysy-smith
   DESTINATION "${BIN_DIR}"
   )
 
