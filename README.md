@@ -1,6 +1,44 @@
-# ![](./csmith.png)
+# sysy-smith
 
-## About
+> A fork of [Csmith](https://github.com/csmith-project/csmith) that generates random programs valid under the [SysY language](https://github.com/pku-minic/kira-rs/blob/master/src/sysy.lalrpop) — a simplified C subset used in the PKU compiler course.
+
+## Changes from Csmith
+
+### Restricted language features
+
+| Feature | Original Csmith | sysy-smith |
+|---|---|---|
+| Types | `int`, `char`, `short`, `long`, `unsigned`, … | `int` only |
+| Integer literals | Any suffix (`UL`, `LL`, …), any range | No suffix, clamped to `[0, 2147483647]` |
+| Operators | Bitwise (`&`, `\|`, `^`, `~`), shift (`<<`, `>>`) | Removed |
+| Compound assignment | `+=`, `-=`, `*=`, `/=`, `%=`, `<<=`, `>>=`, `&=`, `\|=`, `^=` | Removed |
+| Increment/decrement | `++`, `--` (pre and post) | Removed |
+| Type casts | Present | Removed |
+| `for` loops | Present | Removed (SysY only has `while`) |
+| `struct` / `union` | Present | Removed |
+| Pointers | Present | Removed |
+| Arrays | Present | Removed |
+| `static` / `volatile` / `const` | Present | Removed |
+| Comma operator | Present | Removed |
+| Assignment as expression | Present | Removed |
+| `#include` / `#define` / macros | Present in output | Removed from output |
+| Checksum / hash infrastructure | Present | Removed |
+
+### Output format
+
+- No `#include` or `#define` directives in generated files.
+- `main()` takes no arguments and returns `0` unconditionally.
+- Empty parameter lists use `()` instead of `(void)`.
+
+### Function ordering (`--no-forward-decls` / `--forward-decls`)
+
+By default (`--no-forward-decls`), sysy-smith topologically sorts functions so every callee is defined before its callers — no forward declarations are needed. This is required because SysY does not support function declarations.
+
+Pass `--forward-decls` to restore the original Csmith behaviour (forward declarations emitted, functions in creation order).
+
+---
+
+## About Csmith
 
 Csmith is a random generator of C programs. It's primary purpose is to find
 compiler bugs with random programs, using differential testing as the
@@ -13,58 +51,38 @@ write them, feel free to give Csmith a try.
 Csmith outputs C programs free of undefined behaviors (believe us, that's
 not trivial), and the statistics of each generated program.
 
-## Install Csmith
+## Install sysy-smith
 
-You can install Csmith from tarballs downloaded from [here (coming soon)](doc/releases.md),
-or you can build it from the source. The following commands
-apply to Ubuntu.
+Pre-built binaries for `x86_64` and `aarch64` Linux are available on the [Releases](https://github.com/hsqStephenZhang/sysy-smith/releases) page.
 
-```
-git clone https://github.com/csmith-project/csmith.git
-cd csmith
-sudo apt install g++ cmake m4
-cmake -DCMAKE_INSTALL_PREFIX=<INSTALL-PREFIX> .
-make && make install
-```
-
-Please see specific instructions for [building on
-Windows](doc/build-csmith-on-windows.md).
-
-## Use Csmith
-
-Suppose Csmith is installed to `$HOME/csmith` locally. You can simply
-generate, compile, and execute a test case by:
+To build from source (Ubuntu):
 
 ```bash
-export PATH=$PATH:$HOME/csmith/bin
-csmith > random1.c
-gcc random1.c -I$HOME/csmith/include -o random1
-./random1
+git clone https://github.com/hsqStephenZhang/sysy-smith.git
+cd sysy-smith
+sudo apt install g++ cmake m4
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --target sysy-smith -j$(nproc)
+# binary at build/src/sysy-smith
 ```
 
-To add differential testing into the picture, we need to install another
-compiler, e.g., another version of **gcc** or **clang**. And repeat the process of:
+## Use sysy-smith
 
-```
-csmith > random2.c
-gcc random2.c -I$HOME/csmith/include -o random2_gcc
-clang random2.c -I$HOME/csmith/include -o random2_clang
-./random2_gcc > gcc_output.txt
-./random2_clang > clang_output.txt
+Generate a random SysY-compatible program and compile it with a SysY compiler:
+
+```bash
+./sysy-smith --no-argc --seed 42 > test.c
+kira -koopa test.c -o test.koopa
 ```
 
-If there is any difference in `gcc_output.txt` and `clang_output.txt`,
-aha, you have found a bug in either **gcc** or **clang**, or, in the
-unlikely case, a bug in Csmith itself.
+Key options:
 
-You could write scripts in your favorite language to repeat
-the above process to amplify the power of random differential testing.
+- `--no-argc` — omit `argc`/`argv` from `main` (required for SysY)
+- `--seed <N>` — set the random seed for reproducible output
+- `--no-forward-decls` — (default) emit functions in dependency order, no forward declarations
+- `--forward-decls` — emit forward declarations and functions in creation order
 
-The generated programs might contain infinite loops. The best practice is
-to apply timeout to their executions.
-
-Use `csmith -h` or `csmith -hh` to see lists of command line options that you
-can pass to Csmith and customize the random generation.
+Use `./sysy-smith -h` or `./sysy-smith -hh` to see all available options.
 
 Here is a slightly outdated but still relevant document about
 [using Csmith for compiler testing](http://embed.cs.utah.edu/csmith/using.html).
